@@ -23,6 +23,11 @@ class MetalArchives(object):
     lyric_id_re = re.compile(r'id=.+[a-z]+.(?P<id>\d+)')
     band_name_re = re.compile(r'title="(?P<name>.*)\"')
     tags_re = re.compile(r'<[^>]+>')
+    genres = ["black", "death", "doom", "stoner", "sludge", "electronic",
+              "industrial", "experimental", "avant-garde", "folk", "viking",
+              "pagan", "gothic", "grindcore", "groove", "heavy", "metalcore",
+              "deathcore", "power", "progressive", "speed", "symphonic",
+              "thrash"]
 
     @staticmethod
     def get_band_data(url):
@@ -68,8 +73,15 @@ class MetalArchives(object):
                 result[r] = result[r].split(",")
         return result
 
-    def random_band(self):
-        return self.get_band_data('http://www.metal-archives.com/band/random')
+    def random_band(self, genre=None):
+        band = self.get_band_data('http://www.metal-archives.com/band/random')
+        if genre is not None:
+            if genre.lower().replace(" ", "").replace("trash", "thrash") not \
+                    in self.genres:
+                return {}
+            while band["genre"].lower() != genre.lower():
+                band = self.random_band(genre)
+        return band
 
     def search_song(self, song_title="", band_name="", album_type="any",
                     excluded_album_types=None):
