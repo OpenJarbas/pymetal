@@ -76,11 +76,41 @@ class MetalArchives(object):
     def random_band(self, genre=None):
         band = self.get_band_data('http://www.metal-archives.com/band/random')
         if genre is not None:
-            if genre.lower().replace(" metal", "").replace(" ", "").replace(
-                    "trash", "thrash") not in self.genres:
+            genre = genre.lower()\
+                .replace("death core", "deathcore") \
+                .replace("metal core", "metalcore") \
+                .replace("metal", "") \
+                .replace("trash", "thrash") \
+                .rstrip().lstrip()
+            if genre not in self.genres:
                 return {}
-            while band["genre"].lower() != genre.lower():
-                band = self.random_band(genre)
+            band_genre = band["genre"]\
+                .lower()\
+                .replace("death core", "deathcore") \
+                .replace("metal core", "metalcore") \
+                .replace("metal", "") \
+                .replace("trash", "thrash")\
+                .rstrip().lstrip()
+            if "/" in band_genre:
+                band_genres = band_genre.split("/")
+                for g in band_genres:
+                    if genre == g:
+                        return band
+            while genre != band_genre:
+                band = self.get_band_data(
+                    'http://www.metal-archives.com/band/random')
+                band_genre = band["genre"] \
+                    .lower() \
+                    .replace("death core", "deathcore") \
+                    .replace("metal core", "metalcore") \
+                    .replace("metal", "") \
+                    .replace("trash", "thrash") \
+                    .rstrip().lstrip()
+                if "/" in band_genre:
+                    band_genres = band_genre.split("/")
+                    for g in band_genres:
+                        if genre == g:
+                            return band
         return band
 
     def search_song(self, song_title="", band_name="", album_type="any",
