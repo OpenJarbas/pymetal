@@ -76,8 +76,8 @@ class MetalArchives(object):
     def random_band(self, genre=None):
         band = self.get_band_data('http://www.metal-archives.com/band/random')
         if genre is not None:
-            if genre.lower().replace(" ", "").replace("trash", "thrash") not \
-                    in self.genres:
+            if genre.lower().replace(" metal", "").replace(" ", "").replace(
+                    "trash", "thrash") not in self.genres:
                 return {}
             while band["genre"].lower() != genre.lower():
                 band = self.random_band(genre)
@@ -143,3 +143,6 @@ class MetalArchives(object):
             band_name = band["name"]
             for lyrics in self.get_lyrics(band_name=band_name):
                 yield lyrics
+
+m = MetalArchives()
+print m.random_band("black")
