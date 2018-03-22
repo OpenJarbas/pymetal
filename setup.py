@@ -2,7 +2,7 @@ from distutils.core import setup
 
 setup(
     name='pymetal',
-    version='0.1',
+    version='0.1.1',
     packages=[''],
     url='https://www.github.com/jarbasal/pymetal',
     license='MIT',

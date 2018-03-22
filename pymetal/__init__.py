@@ -67,11 +67,18 @@ class MetalArchives(object):
     def random_band(self):
         return self.get_band_data('http://www.metal-archives.com/band/random')
 
-    def search_song(self, song_title="", band_name=""):
+    def search_song(self, song_title="", band_name="", album_type="any",
+                    excluded_album_types=None):
         params = dict(bandName=band_name, songTitle=song_title)
         url = self.site_url + self.url_search_songs + urlencode(params)
         songs = json.load(urlopen(url))['aaData']
+        excluded_album_types = excluded_album_types or []
         for song in songs:
+            if album_type != "any":
+                if song[2] != album_type:
+                    continue
+            if album_type in excluded_album_types:
+                continue
             data = {"album_url": song[0][
                                  song[0].find('href="') + 5:song[0].find(
                                      '" title=')],
@@ -84,8 +91,8 @@ class MetalArchives(object):
                     "song_id": self.lyric_id_re.search(song[4]).group("id")}
             yield data
 
-    def search_band(self, band_name="", genre="", start=0):
-        params = dict(bandName=band_name, genre=genre, iDisplayStart=start)
+    def search_band(self, band_name="", genre="", index=0):
+        params = dict(bandName=band_name, genre=genre, iDisplayStart=index)
         url = self.site_url + self.url_search_bands + urlencode(params)
         bands, num = json.load(urlopen(url))['aaData'], \
                      json.load(urlopen(url))["iTotalRecords"]
@@ -97,10 +104,26 @@ class MetalArchives(object):
                 "country": band[2]}
             yield data
 
-    def get_lyrics(self, song_id):
+    def get_lyrics_by_song_id(self, song_id):
         url = self.site_url + self.url_lyrics + song_id
         lyrics = self.tags_re.sub('', urlopen(url).read().strip()).decode(
             'utf-8')
-        if lyrics == self.lyrics_not_available:
-            return None
         return lyrics
+
+    def get_lyrics(self, song_title="", band_name="", album_type="any",
+                   excluded_album_types=None):
+        for song in self.search_song(song_title=song_title,
+                                     band_name=band_name,
+                                     album_type=album_type,
+                                     excluded_album_types=excluded_album_types):
+
+            song_id = song["song_id"]
+            lyrics = self.get_lyrics_by_song_id(song_id)
+            if lyrics != self.lyrics_not_available:
+                yield lyrics
+
+    def search_lyrics(self, band_name="", genre="", index=0):
+        for band in self.search_band(band_name, genre, index):
+            band_name = band["name"]
+            for lyrics in self.get_lyrics(band_name=band_name):
+                yield lyrics
