@@ -49,7 +49,7 @@ class MetalArchives(object):
             tree.xpath(".//*[@id='band_stats']/dl[1]/dd[4]/text()")
         years_active = \
             tree.xpath(".//*[@id='band_stats']/dl[3]/dd/text()")
-        result["years"] = years_active
+        result["years"] = years_active[0]
 
         for r in result.keys():
             if isinstance(result[r], list) and len(result[r]) == 1:
@@ -59,7 +59,11 @@ class MetalArchives(object):
             if isinstance(result[r], basestring) and result[r] == 'N/A':
                 result[r] = None
             if r == "years":
-                result[r] = result[r][0].rstrip().lstrip()
+                if "," in result[r]:
+                    years = result[r].split(",")
+                    result[r] = [y.rstrip().lstrip() for y in years]
+                else:
+                    result[r] = [result[r].rstrip().lstrip()]
             if r == "theme" and result[r] is not None:
                 result[r] = result[r].split(",")
         return result

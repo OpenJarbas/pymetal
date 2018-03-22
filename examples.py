@@ -13,7 +13,7 @@ print m.random_band()
 # 'theme': None,
 # 'location': 'Kaiserslautern, Rhineland-Palatinate',
 # 'active': 'Active',
-# 'years': ''}
+# 'years': ['1992-present']}
 
 print m.get_band_data("https://www.metal-archives.com/bands/Burzum/88")
 
@@ -27,7 +27,7 @@ print m.get_band_data("https://www.metal-archives.com/bands/Burzum/88")
 # 'theme': ['Myths', ' Folklore', ' Odalism', ' Darkness', ' Philosophy'],
 # 'location': u'Bergen (early), B\xf8 (mid), Limousin, France (later)',
 # 'active': 'Active',
-# 'years': ''}
+# 'years': ['1991-2000', '2009-present']}
 
 # generator, not a list
 for band in m.search_band("metallica"):
