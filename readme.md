@@ -6,6 +6,12 @@ python api for [Encyclopaedia Metallum](https://www.metal-archives.com/)
 
     pip install git+https://www.github.com/jarbasal/pymetal
 
+# related projects
+
+
+[Metal Dataset](https://github.com/JarbasAI/metal_dataset)
+
+
 # usage
 
     from pymetal import MetalArchives
