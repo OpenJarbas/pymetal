@@ -2,8 +2,8 @@ from distutils.core import setup
 
 setup(
     name='pymetal',
-    version='0.1.2',
-    packages=[''],
+    version='0.1.3',
+    packages=['lxml'],
     url='https://www.github.com/jarbasal/pymetal',
     license='MIT',
     author='jarbasAi',

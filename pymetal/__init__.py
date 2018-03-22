@@ -33,7 +33,7 @@ class MetalArchives(object):
             tree.xpath('//*[@id="band_info"]/h1/a/text()')
         result["url"] = \
             tree.xpath('//*[@id="band_info"]/h1/a/@href')
-        result["style"] = \
+        result["genre"] = \
             tree.xpath(".//*[@id='band_stats']/dl[2]/dd[1]/text()")
         result["theme"] = \
             tree.xpath(".//*[@id='band_stats']/dl[2]/dd[2]/text()")
@@ -84,7 +84,7 @@ class MetalArchives(object):
             if album_type in excluded_album_types:
                 continue
             data = {"album_url": song[0][
-                                 song[0].find('href="') + 5:song[0].find(
+                                 song[0].find('href="') + 6:song[0].find(
                                      '" title=')],
                     "band_name": song[0][
                                  song[0].find('>') + 1:song[0].find('</a')],
@@ -102,7 +102,7 @@ class MetalArchives(object):
                      json.load(urlopen(url))["iTotalRecords"]
         for band in bands:
             data = {
-                "url": band[0][band[0].find('href="') + 5:band[0].find('">')],
+                "url": band[0][band[0].find('href="') + 6:band[0].find('">')],
                 "name": band[0][band[0].find('">') + 2:band[0].find('</a>')],
                 "genre": band[1],
                 "country": band[2]}

@@ -20,7 +20,7 @@ python api for [Encyclopaedia Metallum](https://www.metal-archives.com/)
     print m.random_band()
 
     # output:
-    #  {'style': 'Melodic Power Metal',
+    #  {'genre': 'Melodic Power Metal',
     # 'name': 'Divinus',
     # 'url': 'https://www.metal-archives.com/bands/Divinus/12982',
     # 'country': 'Germany',
@@ -34,7 +34,7 @@ python api for [Encyclopaedia Metallum](https://www.metal-archives.com/)
     print m.get_band_data("https://www.metal-archives.com/bands/Burzum/88")
 
     # output:
-    # {'style': 'Black Metal, Ambient',
+    # {'genre': 'Black Metal, Ambient',
     # 'name': 'Burzum',
     # 'url': 'https://www.metal-archives.com/bands/Burzum/88',
     # 'country': 'Norway',
