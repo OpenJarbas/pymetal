@@ -48,7 +48,7 @@ class MetalArchives(object):
             tree.xpath(".//*[@id='band_stats']/dl[1]/dd[1]/a/text()")
         result["location"] = \
             tree.xpath(".//*[@id='band_stats']/dl[1]/dd[2]/text()")
-        result["active"] = \
+        result["status"] = \
             tree.xpath(".//*[@id='band_stats']/dl[1]/dd[3]/text()")
         result["date"] = \
             tree.xpath(".//*[@id='band_stats']/dl[1]/dd[4]/text()")
