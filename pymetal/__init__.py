@@ -173,6 +173,3 @@ class MetalArchives(object):
             band_name = band["name"]
             for lyrics in self.get_lyrics(band_name=band_name):
                 yield lyrics
-
-m = MetalArchives()
-print m.random_band("black")
