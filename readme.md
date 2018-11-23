@@ -9,6 +9,9 @@ python api for [Encyclopaedia Metallum](https://www.metal-archives.com/) and
 
 ## Searching MetalArchives
 
+search metal bands
+
+
     from pymetal import MetalArchives
 
     m = MetalArchives()
@@ -168,11 +171,31 @@ python api for [Encyclopaedia Metallum](https://www.metal-archives.com/) and
 
 ## Seaching DarkLyrics
 
+search for metal lyrics
+
 
     from pymetal.lyrics import DarkLyrics
 
 
     d = DarkLyrics()
+    
+    for artist in d.yield_search("arch enemy", albums=False, songs=False):
+        print(artist)
+        break
+    # {'artist': 'arch enemy', 'url': 'http://www.darklyrics.com/a/archenemy.html', 'name': 'ARCH ENEMY'}
+    
+    for album in d.yield_search("space 1992", songs=False, artists=False):
+        print(album)
+        break
+    # {'artist': 'gloryhammer ', 'url': 'http://www.darklyrics.com/lyrics/gloryhammer/space1992riseofthechaoswizards.html', 'name': 'Space 1992: Rise Of The Chaos Wizards'}
+    
+    for song in d.yield_search("in league with satan", albums=False,
+                               artists=False):
+        print(song)
+        break
+    # {'artist': 'countess ', 'url': 'http://www.darklyrics.com/lyrics/countess/onwingsofdefiance.html#11', 'name': 'In League With Satan'}
+        
+        
     max_pages = 2
     
     general_search = d.search("arch enemy", max_pages)
@@ -524,6 +547,120 @@ python api for [Encyclopaedia Metallum](https://www.metal-archives.com/) and
     # ...
   
 
+
+## Searching AzLyrics
+
+DarkLyrics may occasionally return urls from AzLyrics on search
+
+    d = DarkLyrics()
+
+    for result in d.yield_search("halestorm"):
+        print(result)
+        # {'artist': 'halestorm', 'url': 'http://www.azlyrics.com/h/halestorm.html', 'name': 'HALESTORM'}
+
+You can also search for rock (and pop) music
+
+    az = AZLyrics()
+
+    search = az.quick_search("godsmack")
+    # {'artists': {'Godsmack': 'https://www.azlyrics.com/g/godsmack.html'},
+    #  'songs': {'Bad Religion': 'https://www.azlyrics.com/lyrics/godsmack/badreligion.html',
+    #            'Bulletproof': 'https://www.azlyrics.com/lyrics/godsmack/bulletproof.html',
+    #            'I Stand Alone': 'https://www.azlyrics.com/lyrics/godsmack/istandalone.html',
+    #            'Straight Out Of Line': 'https://www.azlyrics.com/lyrics/godsmack/straightoutofline.html',
+    #            'Under Your Scars': 'https://www.azlyrics.com/lyrics/godsmack/underyourscars.html'}}
+
+    for artist in az.yield_artists("steel panther"):
+        print(artist)
+        break
+    # {'name': 'Steel Panther', 'url': 'https://www.azlyrics.com/s/steelpanther.html'}
+
+    for song in az.yield_songs("i get off"):
+        print(song)
+        break
+    # {'song': 'I Get Off', 'url': 'https://www.azlyrics.com/lyrics/halestorm/igetoff.html', 'artist': 'Halestorm'}
+
+    lyrics = az.parse_song_url("https://www.azlyrics.com/lyrics/steelpanther/deathtoallbutmetal.html")
+    # All right!
+    # Yeah!
+    # C-c-come on!
+    #
+    # Fuck the Goo Goo Dolls, they can suck my balls
+    # They look like the dorks that hang out at the mall
+    # Eminem can suck it, so can Dr. Dre
+    # They can suck each other, just because they're gay
+    #
+    # They can suck a dick, they can lick a sack
+    # Everybody shout, "Heavy metal's back!"
+    #
+    # Death to all but metal
+    # Death to all but metal
+    # Death to all but metal
+    #
+    # Death to Papa Roach, Blink 182
+    # All those fucking pussies sounds like doggy doo
+    # Wearing baggy pants, spiking up their hair
+    # They're not worth the crust on my underwear
+    #
+    # Where is Def Leppard? Where is MÃ¶tley CrÃ¼e?
+    # Why do all my lyrics sound like Dr. Seuss?
+    #
+    # Death to all but metal
+    # Death to all but metal
+    # Death to all but metal
+    #
+    # Kill those fucking fuckheads who program MTV
+    # They can suck my ass with all the record companies
+    #
+    # Death to Britney Spears, kill the little slut
+    # Kill Madonna too and then fuck her in the butt
+    # Fuck Mariah Carey, death to Sheryl Crow
+    # They can kiss each other on their camel toe
+    #
+    # 50 Cent's a fag, so is Kanye West
+    # Shooting hot sperm on each others' chest
+    #
+    # Death to all but metal
+    # Death to all but metal
+    # Death to all but metal
+
+    discography = az.parse_artist_url(
+        "https://www.azlyrics.com/m/motleycrue.html")
+    # {'albums': [{'album_type': 'album',
+    #              'name': 'Too Fast For Love',
+    #              'release_date': '1981'},
+    #             {'album_type': 'album',
+    #              'name': 'Shout At The Devil',
+    #              'release_date': '1983'},
+    #             {'album_type': 'album',
+    #              'name': 'Theatre Of Pain',
+    #              'release_date': '1985'},
+    # ....],
+    #  'artist': 'Motley Crue',
+    #  'songs': [{'name': 'Live Wire',
+    #             'url': 'https://www.azlyrics.com/lyrics/lyrics/motleycrue/livewire.html'},
+    #            {'name': 'Come On And Dance',
+    #             'url': 'https://www.azlyrics.com/lyrics/lyrics/motleycrue/comeonanddance.html'},
+    #            {'name': 'Public Enemy #1',
+    #             'url': 'https://www.azlyrics.com/lyrics/lyrics/motleycrue/publicenemy1.html'},
+    #            ...
+    #            {'name': 'Just Another Psycho',
+    #             'url': 'https://www.azlyrics.com/lyrics/lyrics/motleycrue/justanotherpsycho.html'},
+    #            {'name': 'Chicks = Trouble',
+    #             'url': 'https://www.azlyrics.com/lyrics/lyrics/motleycrue/chickstrouble.html'},
+    #            {'name': "This Ain't A Love Song",
+    #             'url': 'https://www.azlyrics.com/lyrics/lyrics/motleycrue/thisaintalovesong.html'},
+    #            {'name': 'White Trash Circus',
+    #             'url': 'https://www.azlyrics.com/lyrics/lyrics/motleycrue/whitetrashcircus.html'},
+    #            {'name': "Goin' Out Swingin'",
+    #             'url': 'https://www.azlyrics.com/lyrics/lyrics/motleycrue/goinoutswingin.html'},
+    #            {'name': '10.000 Miles Away',
+    #             'url': 'https://www.azlyrics.com/lyrics/lyrics/motleycrue/10000milesaway.html'},
+    #            {'name': 'All Bad Things',
+    #             'url': 'https://www.azlyrics.com/lyrics/lyrics/motleycrue/allbadthings.html'},
+    #            {'name': 'Bitter Pill',
+    #             'url': 'https://www.azlyrics.com/lyrics/lyrics/motleycrue/bitterpill.html'}]}
+    
 ## related projects
 
 
