@@ -1,2 +1,4 @@
+requests
 bs4
 lxml
+random-user-agent

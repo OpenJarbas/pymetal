@@ -1,26 +1,9 @@
 import requests
 from bs4 import BeautifulSoup
-
-
-def merge_dict(base, delta):
-    """
-        Recursively merging dictionaries.
-
-        Args:
-            base:  Target for merge
-            delta: Dictionary to merge into base
-    """
-
-    for k, dv in delta.items():
-        bv = base.get(k)
-        if isinstance(dv, dict) and isinstance(bv, dict):
-            merge_dict(bv, dv)
-        else:
-            base[k] = dv
+from pymetal.util import merge_dict
 
 
 class DarkLyrics(object):
-
     search_url = "http://www.darklyrics.com/search.php?"
 
     def search_artist(self, artist, max_pages=1):
@@ -131,7 +114,7 @@ class DarkLyrics(object):
                         artist = bucket[0].lower()
                         song_name = "-".join(bucket[1:])
                     yield {"artist": artist, "name": song_name.strip(),
-                           "url":  "http://www.darklyrics.com/" + url}
+                           "url": "http://www.darklyrics.com/" + url}
                 elif albums:
                     album_name = name
                     artist = ""
@@ -178,9 +161,9 @@ class DarkLyrics(object):
                         artist = bucket[0].lower()
                         song_name = "-".join(bucket[1:])
                     songs[song_name.strip()] = {"artist": artist,
-                                        "name": song_name.strip(),
-                                        "url": "http://www.darklyrics.com/"
-                                               + url}
+                                                "name": song_name.strip(),
+                                                "url": "http://www.darklyrics.com/"
+                                                       + url}
                 else:
                     album_name = name
                     artist = ""
@@ -204,7 +187,7 @@ class DarkLyrics(object):
         artist = soup.find("h1").text.lower().replace(" lyrics", "")
         album = soup.find("div", {"class": "albumlyrics"}).text.split("\n")[1]
         album_type = album.split(":")[0]
-        album_name = album.replace('"', "").replace(album_type+":", "")
+        album_name = album.replace('"', "").replace(album_type + ":", "")
         if "(" in album_name:
             album_name, album_date = album_name.replace(")", "").split(" (")
         else:
@@ -216,7 +199,7 @@ class DarkLyrics(object):
         for e in lyrics.find_all("h3"):
             num = e.text[:e.text.find(".")]
             song = e.text[e.text.find(".") + 1:].strip()
-            song_lyrics = lyrics.text.split(e.text)[1].split(str(int(num) + 1)+". ")[0]
+            song_lyrics = lyrics.text.split(e.text)[1].split(str(int(num) + 1) + ". ")[0]
             data[song] = {"song_number": num, "lyrics": song_lyrics.strip(),
                           "artist": artist, "album": album_name.strip(),
                           "album_type": album_type, "album_date": album_date}
@@ -317,7 +300,7 @@ class AZLyrics(object):
                     songs.append({"song": name, "url": url, "artist": artist})
         if max_pages > 1:
             try:
-                songs += self.search_songs(song, max_pages, page+1)
+                songs += self.search_songs(song, max_pages, page + 1)
             except:
                 pass
         return songs
@@ -337,7 +320,7 @@ class AZLyrics(object):
                 if panel_type == "Songs":
                     yield {"song": name, "url": url, "artist": artist}
         try:
-            for song in self.yield_songs(song, page+1):
+            for song in self.yield_songs(song, page + 1):
                 yield song
         except:
             pass
@@ -422,6 +405,7 @@ class AZLyrics(object):
         return {"song": song.replace('"', ""), "artist": artist,
                 "album": album, "lyrics": lyrics}
 
+
 if __name__ == "__main__":
     d = DarkLyrics()
 
@@ -437,7 +421,6 @@ if __name__ == "__main__":
                                artists=False):
         print(song)
         break
-
 
     az = AZLyrics()
 
@@ -539,4 +522,3 @@ if __name__ == "__main__":
     #             'url': 'https://www.azlyrics.com/lyrics/lyrics/motleycrue/allbadthings.html'},
     #            {'name': 'Bitter Pill',
     #             'url': 'https://www.azlyrics.com/lyrics/lyrics/motleycrue/bitterpill.html'}]}
-

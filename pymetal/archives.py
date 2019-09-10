@@ -1,17 +1,7 @@
 import requests
 from lxml import html
 import re
-import json
-import sys
-
-if sys.version_info[0] < 3:
-    from urllib import urlencode
-    from urllib2 import urlopen
-else:
-    from urllib.request import urlopen
-    from urllib.parse import urlencode
-
-__author__ = "jarbas"
+from pymetal.util import get_random_user_agent
 
 
 class MetalArchives(object):
@@ -32,7 +22,7 @@ class MetalArchives(object):
     @staticmethod
     def get_band_data(url):
         result = {}
-        response = requests.get(url)
+        response = requests.get(url, headers={'User-Agent': get_random_user_agent()})
         tree = html.fromstring(response.content)
         result["name"] = \
             tree.xpath('//*[@id="band_info"]/h1/a/text()')
@@ -54,7 +44,7 @@ class MetalArchives(object):
             tree.xpath(".//*[@id='band_stats']/dl[1]/dd[4]/text()")
         years_active = \
             tree.xpath(".//*[@id='band_stats']/dl[3]/dd/text()")
-        result["years"] = years_active[0]
+        # result["years"] = years_active[0]
 
         for r in result.keys():
             if isinstance(result[r], list) and len(result[r]) == 1:
@@ -116,8 +106,9 @@ class MetalArchives(object):
     def search_song(self, song_title="", band_name="", album_type="any",
                     excluded_album_types=None):
         params = dict(bandName=band_name, songTitle=song_title)
-        url = self.site_url + self.url_search_songs + urlencode(params)
-        songs = json.load(urlopen(url))['aaData']
+        url = self.site_url + self.url_search_songs
+        data = requests.get(url, params=params, headers={'User-Agent': get_random_user_agent()}).json()
+        songs = data['aaData']
         excluded_album_types = excluded_album_types or []
         for song in songs:
             if album_type != "any":
@@ -139,9 +130,9 @@ class MetalArchives(object):
 
     def search_band(self, band_name="", genre="", index=0):
         params = dict(bandName=band_name, genre=genre, iDisplayStart=index)
-        url = self.site_url + self.url_search_bands + urlencode(params)
-        bands, num = json.load(urlopen(url))['aaData'], \
-                     json.load(urlopen(url))["iTotalRecords"]
+        url = self.site_url + self.url_search_bands
+        data = requests.get(url, params=params, headers={'User-Agent': get_random_user_agent()}).json()
+        bands, num = data['aaData'], data["iTotalRecords"]
         for band in bands:
             data = {
                 "url": band[0][band[0].find('href="') + 6:band[0].find('">')],
@@ -152,8 +143,8 @@ class MetalArchives(object):
 
     def get_lyrics_by_song_id(self, song_id):
         url = self.site_url + self.url_lyrics + song_id
-        lyrics = self.tags_re.sub('', urlopen(url).read().strip()).decode(
-            'utf-8')
+        data = requests.get(url, headers={'User-Agent': get_random_user_agent()})
+        lyrics = self.tags_re.sub('', data.text.strip())
         return lyrics
 
     def get_lyrics(self, song_title="", band_name="", album_type="any",
@@ -173,3 +164,9 @@ class MetalArchives(object):
             band_name = band["name"]
             for lyrics in self.get_lyrics(band_name=band_name):
                 yield lyrics
+
+
+if __name__ == "__main__":
+    m = MetalArchives()
+    for l in m.search_lyrics("inquisition"):
+        print(l)

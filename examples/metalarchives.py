@@ -1,8 +1,7 @@
 from pymetal import MetalArchives
 
 m = MetalArchives()
-print m.random_band()
-
+print(m.random_band())
 # output:
 #  {'genre': 'Melodic Power Metal',
 # 'name': 'Divinus',
@@ -15,7 +14,7 @@ print m.random_band()
 # 'status': 'Active',
 # 'years': ['1992-present']}
 
-print m.get_band_data("https://www.metal-archives.com/bands/Burzum/88")
+print(m.get_band_data("https://www.metal-archives.com/bands/Burzum/88"))
 
 # output:
 # {'genre': 'Black Metal, Ambient',
@@ -31,7 +30,7 @@ print m.get_band_data("https://www.metal-archives.com/bands/Burzum/88")
 
 # generator, not a list
 for band in m.search_band("metallica"):
-    print band
+    print(band)
     # output:
     # {'url': u'"https://www.metal-archives.com/bands/Metallica/125',
     # 'genre': u'Thrash Metal (early), Hard Rock/Heavy/Thrash Metal (later)',
@@ -40,7 +39,7 @@ for band in m.search_band("metallica"):
 
 # generator, not a list
 for song in m.search_song("black metal ist krieg"):
-    print song
+    print(song)
     break
 
     # output:
@@ -55,7 +54,7 @@ for song in m.search_song("black metal ist krieg"):
 # generator, not a list
 for lyrics in m.get_lyrics(song_title="ace of spades",
                           band_name="Motorhead"):
-    print lyrics
+    print(lyrics)
     break
         # output:
         # If you like to gamble, I tell you I'm your man,
@@ -83,7 +82,7 @@ for lyrics in m.get_lyrics(song_title="ace of spades",
 
 # generator, not a list
 for lyrics in m.search_lyrics(genre="death metal"):
-        print lyrics
+        print(lyrics)
         break
         # output:
         # endless eons
