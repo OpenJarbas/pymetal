@@ -2,9 +2,9 @@ from distutils.core import setup
 
 setup(
     name='pymetal',
-    version='0.3',
+    version='0.4',
     packages=[],
-    install_requires=["requesrs", "bs4", "lxml", "random-user-agent"],
+    install_requires=["requests", "bs4", "lxml", "random-user-agent"],
     url='https://www.github.com/jarbasal/pymetal',
     license='MIT',
     author='jarbasAi',

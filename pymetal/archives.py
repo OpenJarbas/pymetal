@@ -114,7 +114,7 @@ class MetalArchives(object):
             if album_type != "any":
                 if song[2] != album_type:
                     continue
-            if album_type in excluded_album_types:
+            if song[2] in excluded_album_types:
                 continue
             data = {"album_url": song[0][
                                  song[0].find('href="') + 6:song[0].find(
