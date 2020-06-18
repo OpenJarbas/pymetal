@@ -9,7 +9,7 @@ python api for [Encyclopaedia Metallum](https://www.metal-archives.com/) and
 pip install pymetal
 ```
 
-## Searching MetalArchives
+#### Searching MetalArchives
 
 search metal bands
 
@@ -171,7 +171,7 @@ for lyrics in m.search_lyrics(genre="death metal"):
         # around a dead hole
  ```       
 
-## Seaching DarkLyrics
+#### Seaching DarkLyrics
 
 search for metal lyrics
 
@@ -549,8 +549,7 @@ lyrics = d.parse_album_url(url)
 # ...
 ```  
 
-
-## Searching AzLyrics
+#### Searching AzLyrics
 
 DarkLyrics may occasionally return urls from AzLyrics on search
 
@@ -671,7 +670,7 @@ discography = az.parse_artist_url(
 #             'url': 'https://www.azlyrics.com/lyrics/lyrics/motleycrue/bitterpill.html'}]}
 ```
 
-## related projects
+### related projects
 
 [Metal Dataset](https://github.com/OpenJarbas/metal_dataset)
 
