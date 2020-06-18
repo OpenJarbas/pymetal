@@ -18,9 +18,6 @@ def get_az_lyrics(artist):
         yield az.parse_song_url(song["url"])["lyrics"]
 
 
-for angry_lyrics in get_dark_lyrics("five finger death punch"):
-    print(angry_lyrics)
-
 for murder_lyrics in get_dark_lyrics("six feet under"):
     print(murder_lyrics)
 for evil_lyrics in get_dark_lyrics("inquisition"):

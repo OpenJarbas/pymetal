@@ -7,9 +7,12 @@ def get_random_user_agent():
     # you can also set number of user agents required by providing `limit` as parameter
 
     software_names = [SoftwareName.CHROME.value]
-    operating_systems = [OperatingSystem.WINDOWS.value, OperatingSystem.LINUX.value]
+    operating_systems = [OperatingSystem.WINDOWS.value,
+                         OperatingSystem.LINUX.value]
 
-    user_agent_rotator = UserAgent(software_names=software_names, operating_systems=operating_systems, limit=100)
+    user_agent_rotator = UserAgent(software_names=software_names,
+                                   operating_systems=operating_systems,
+                                   limit=100)
 
     return user_agent_rotator.get_random_user_agent()
 
@@ -29,3 +32,4 @@ def merge_dict(base, delta):
             merge_dict(bv, dv)
         else:
             base[k] = dv
+    return base

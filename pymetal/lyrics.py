@@ -1,9 +1,12 @@
-import requests
 from bs4 import BeautifulSoup
 from pymetal.util import merge_dict
+from requests_cache import CachedSession
+from datetime import timedelta
 
 
-class DarkLyrics(object):
+class DarkLyrics:
+    session = CachedSession(backend='memory',
+                            expire_after=timedelta(hours=1))
     search_url = "http://www.darklyrics.com/search.php?"
 
     def search_artist(self, artist, max_pages=1):
@@ -21,7 +24,7 @@ class DarkLyrics(object):
         for k in data:
             for entry in data[k]:
                 url = data[k][entry]["url"]
-                r = requests.get(url)
+                r = self.session.get(url)
                 html = r.text
                 soup = BeautifulSoup(html, 'html.parser')
                 if "/lyrics/" not in url:
@@ -33,7 +36,7 @@ class DarkLyrics(object):
         lyrics = {}
         for entry in data["songs"]:
             url, num = data["songs"][entry]["url"].split("#")
-            r = requests.get(url)
+            r = self.session.get(url)
             html = r.text
             soup = BeautifulSoup(html, 'html.parser')
             bucket = self._parse_lyrics(soup)
@@ -43,20 +46,20 @@ class DarkLyrics(object):
                     lyrics[song] = bucket[song]
         for entry in data["artists"]:
             url = data["artists"][entry]["url"]
-            r = requests.get(url)
+            r = self.session.get(url)
             html = r.text
             soup = BeautifulSoup(html, 'html.parser')
             bucket = self._parse_artist(soup)
             for album in bucket:
                 songs = bucket[album]
                 url = songs[0]["url"].replace("#1", "")
-                r = requests.get(url)
+                r = self.session.get(url)
                 html = r.text
                 soup = BeautifulSoup(html, 'html.parser')
                 merge_dict(lyrics, self._parse_lyrics(soup))
         for entry in data["albums"]:
             url = data["albums"][entry]["url"]
-            r = requests.get(url)
+            r = self.session.get(url)
             html = r.text
             soup = BeautifulSoup(html, 'html.parser')
             merge_dict(lyrics, self._parse_lyrics(soup))
@@ -64,7 +67,8 @@ class DarkLyrics(object):
         return lyrics
 
     def search(self, query, max_pages=1):
-        r = requests.get(self.search_url, {"q": query})
+        r = self.session.get(self.search_url,
+                             params={"q": query})
         html = r.text
         soup = BeautifulSoup(html, 'html.parser')
         data = self._parse_search(soup)
@@ -72,7 +76,8 @@ class DarkLyrics(object):
             max_pages = data["num_pages"]
         if max_pages > 1 and data["num_pages"] > 1:
             for p in range(2, data["num_pages"] + 1):
-                r = requests.get(self.search_url, {"q": query, "p": p})
+                r = self.session.get(self.search_url,
+                                     params={"q": query, "p": p})
                 html = r.text
                 soup = BeautifulSoup(html, 'html.parser')
                 bucket = self._parse_search(soup)
@@ -86,9 +91,11 @@ class DarkLyrics(object):
     def yield_search(self, query, artists=True, albums=True, songs=True,
                      page=1):
         if page > 1:
-            r = requests.get(self.search_url, {"q": query, "p": page})
+            r = self.session.get(self.search_url,
+                                 params={"q": query, "p": page})
         else:
-            r = requests.get(self.search_url, {"q": query})
+            r = self.session.get(self.search_url,
+                                 params={"q": query})
         html = r.text
         soup = BeautifulSoup(html, 'html.parser')
         pages = soup.find_all("div", {"class": "search"})
@@ -184,25 +191,28 @@ class DarkLyrics(object):
 
     def _parse_lyrics(self, soup):
         data = {}
-        artist = soup.find("h1").text.lower().replace(" lyrics", "")
-        album = soup.find("div", {"class": "albumlyrics"}).text.split("\n")[1]
-        album_type = album.split(":")[0]
-        album_name = album.replace('"', "").replace(album_type + ":", "")
-        if "(" in album_name:
-            album_name, album_date = album_name.replace(")", "").split(" (")
-        else:
-            album_date = ""
-        lyrics = soup.find("div", {"class": "lyrics"})
+        try:
+            artist = soup.find("h1").text.lower().replace(" lyrics", "")
+            album = soup.find("div", {"class": "albumlyrics"}).text.split("\n")[1]
+            album_type = album.split(":")[0]
+            album_name = album.replace('"', "").replace(album_type + ":", "")
+            if "(" in album_name:
+                album_name, album_date = album_name.replace(")", "").split(" (")
+            else:
+                album_date = ""
+            lyrics = soup.find("div", {"class": "lyrics"})
 
-        if not lyrics:
-            return data
-        for e in lyrics.find_all("h3"):
-            num = e.text[:e.text.find(".")]
-            song = e.text[e.text.find(".") + 1:].strip()
-            song_lyrics = lyrics.text.split(e.text)[1].split(str(int(num) + 1) + ". ")[0]
-            data[song] = {"song_number": num, "lyrics": song_lyrics.strip(),
-                          "artist": artist, "album": album_name.strip(),
-                          "album_type": album_type, "album_date": album_date}
+            if not lyrics:
+                return data
+            for e in lyrics.find_all("h3"):
+                num = e.text[:e.text.find(".")]
+                song = e.text[e.text.find(".") + 1:].strip()
+                song_lyrics = lyrics.text.split(e.text)[1].split(str(int(num) + 1) + ". ")[0]
+                data[song] = {"song_number": num, "lyrics": song_lyrics.strip(),
+                              "artist": artist, "album": album_name.strip(),
+                              "album_type": album_type, "album_date": album_date}
+        except Exception as e:
+            print(e)  # TODO debug, this failed here once
         return data
 
     def _parse_artist(self, soup):
@@ -229,7 +239,7 @@ class DarkLyrics(object):
         assert url.startswith("http://www.darklyrics.com/")
         assert "/lyrics/" not in url
         assert "#" not in url
-        r = requests.get(url)
+        r = self.session.get(url)
         html = r.text
         soup = BeautifulSoup(html, 'html.parser')
         return self._parse_artist(soup)
@@ -239,7 +249,7 @@ class DarkLyrics(object):
         assert "/lyrics/" in url
         assert "#" in url
         url, num = url.split("#")
-        r = requests.get(url)
+        r = self.session.get(url)
         html = r.text
         soup = BeautifulSoup(html, 'html.parser')
         lyric = self._parse_lyrics(soup)
@@ -252,17 +262,20 @@ class DarkLyrics(object):
         assert url.startswith("http://www.darklyrics.com/")
         assert "/lyrics/" in url
         assert "#" not in url
-        r = requests.get(url)
+        r = self.session.get(url)
         html = r.text
         soup = BeautifulSoup(html, 'html.parser')
         return self._parse_lyrics(soup)
 
 
-class AZLyrics(object):
+class AZLyrics:
+    session = CachedSession(backend='memory',
+                            expire_after=timedelta(hours=1))
     search_url = "https://search.azlyrics.com/search.php?"
 
     def search_artists(self, artist, max_pages=1, page=1):
-        r = requests.get(self.search_url, {"q": artist, "w": "artists"})
+        r = self.session.get(self.search_url,
+                             params={"q": artist, "w": "artists"})
         html = r.text
         soup = BeautifulSoup(html, 'html.parser')
         panels = soup.find_all("div", {"class": "panel"})
@@ -284,7 +297,8 @@ class AZLyrics(object):
         return artists
 
     def search_songs(self, song, max_pages=1, page=1):
-        r = requests.get(self.search_url, {"q": song, "w": "songs"})
+        r = self.session.get(self.search_url,
+                             params={"q": song, "w": "songs"})
         html = r.text
         soup = BeautifulSoup(html, 'html.parser')
         panels = soup.find_all("div", {"class": "panel"})
@@ -306,7 +320,8 @@ class AZLyrics(object):
         return songs
 
     def yield_songs(self, song, page=1):
-        r = requests.get(self.search_url, {"q": song, "w": "songs"})
+        r = self.session.get(self.search_url,
+                             params={"q": song, "w": "songs"})
         html = r.text
         soup = BeautifulSoup(html, 'html.parser')
         panels = soup.find_all("div", {"class": "panel"})
@@ -326,7 +341,8 @@ class AZLyrics(object):
             pass
 
     def yield_artists(self, artist, max_pages=1, page=1):
-        r = requests.get(self.search_url, {"q": artist, "w": "artists"})
+        r = self.session.get(self.search_url,
+                             params={"q": artist, "w": "artists"})
         html = r.text
         soup = BeautifulSoup(html, 'html.parser')
         panels = soup.find_all("div", {"class": "panel"})
@@ -347,7 +363,8 @@ class AZLyrics(object):
         return artists
 
     def quick_search(self, query):
-        r = requests.get(self.search_url, {"q": query})
+        r = self.session.get(self.search_url,
+                             params={"q": query})
         html = r.text
         soup = BeautifulSoup(html, 'html.parser')
         panels = soup.find_all("div", {"class": "panel"})
@@ -369,7 +386,7 @@ class AZLyrics(object):
         return {"artists": artists, "songs": songs, "albums": albums}
 
     def parse_artist_url(self, url):
-        r = requests.get(url)
+        r = self.session.get(url)
         html = r.text
         soup = BeautifulSoup(html, 'html.parser')
         artist = soup.find("h1").text.replace(" Lyrics", "")
@@ -393,7 +410,7 @@ class AZLyrics(object):
         return {"artist": artist, "songs": songs, "albums": albums}
 
     def parse_song_url(self, url):
-        r = requests.get(url)
+        r = self.session.get(url)
         html = r.text
         soup = BeautifulSoup(html, 'html.parser')
         artist = soup.find("h2").text.replace(" Lyrics", "")
@@ -407,6 +424,8 @@ class AZLyrics(object):
 
 
 if __name__ == "__main__":
+    from pprint import pprint
+
     d = DarkLyrics()
 
     for artist in d.yield_search("arch enemy", albums=False, songs=False):
@@ -443,6 +462,7 @@ if __name__ == "__main__":
     # {'song': 'I Get Off', 'url': 'https://www.azlyrics.com/lyrics/halestorm/igetoff.html', 'artist': 'Halestorm'}
 
     lyrics = az.parse_song_url("https://www.azlyrics.com/lyrics/steelpanther/deathtoallbutmetal.html")
+    pprint(lyrics)
     # All right!
     # Yeah!
     # C-c-come on!
@@ -488,6 +508,7 @@ if __name__ == "__main__":
 
     discography = az.parse_artist_url(
         "https://www.azlyrics.com/m/motleycrue.html")
+    pprint(discography)
     # {'albums': [{'album_type': 'album',
     #              'name': 'Too Fast For Love',
     #              'release_date': '1981'},

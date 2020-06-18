@@ -1,4 +1,5 @@
 requests
 bs4
-lxml
+requests_cache
 random-user-agent
+lxml

@@ -1,10 +1,13 @@
-import requests
+from requests_cache import CachedSession
+from datetime import timedelta
 from lxml import html
 import re
 from pymetal.util import get_random_user_agent
 
 
-class MetalArchives(object):
+class MetalArchives:
+    session = CachedSession(backend='memory',
+                            expire_after=timedelta(hours=1))
     site_url = 'https://www.metal-archives.com/'
     url_search_songs = 'search/ajax-advanced/searching/songs?'
     url_search_bands = 'search/ajax-advanced/searching/bands?'
@@ -22,7 +25,8 @@ class MetalArchives(object):
     @staticmethod
     def get_band_data(url):
         result = {}
-        response = requests.get(url, headers={'User-Agent': get_random_user_agent()})
+        response = MetalArchives.session.get(url,
+                                             headers={'User-Agent': get_random_user_agent()})
         tree = html.fromstring(response.content)
         result["name"] = \
             tree.xpath('//*[@id="band_info"]/h1/a/text()')
@@ -107,7 +111,8 @@ class MetalArchives(object):
                     excluded_album_types=None):
         params = dict(bandName=band_name, songTitle=song_title)
         url = self.site_url + self.url_search_songs
-        data = requests.get(url, params=params, headers={'User-Agent': get_random_user_agent()}).json()
+        data = self.session.get(url, params=params,
+                                headers={'User-Agent': get_random_user_agent()}).json()
         songs = data['aaData']
         excluded_album_types = excluded_album_types or []
         for song in songs:
@@ -131,7 +136,8 @@ class MetalArchives(object):
     def search_band(self, band_name="", genre="", index=0):
         params = dict(bandName=band_name, genre=genre, iDisplayStart=index)
         url = self.site_url + self.url_search_bands
-        data = requests.get(url, params=params, headers={'User-Agent': get_random_user_agent()}).json()
+        data = self.session.get(url, params=params,
+                                headers={'User-Agent': get_random_user_agent()}).json()
         bands, num = data['aaData'], data["iTotalRecords"]
         for band in bands:
             data = {
@@ -143,7 +149,8 @@ class MetalArchives(object):
 
     def get_lyrics_by_song_id(self, song_id):
         url = self.site_url + self.url_lyrics + song_id
-        data = requests.get(url, headers={'User-Agent': get_random_user_agent()})
+        data = self.session.get(url,
+                            headers={'User-Agent': get_random_user_agent()})
         lyrics = self.tags_re.sub('', data.text.strip())
         return lyrics
 
